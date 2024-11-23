@@ -1,4 +1,4 @@
-# Setup Jenkins and Docker on Ubuntu EC2 Instance
+# Setting Up Jenkins and Docker on an Ubuntu EC2 Instance with CI/CD Pipeline
 
 This guide provides step-by-step instructions for launching an Ubuntu EC2 instance, installing Jenkins and Docker, and setting up a Jenkins CI/CD pipeline to deploy a Python application.
 
