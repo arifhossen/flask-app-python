@@ -127,7 +127,7 @@ sudo systemctl enable docker
 
 
 
-## Create New Item and source code setup and scirpt command
+## In jenkins : Create New Item and source code setup and scirpt command
 Create a new freestyle project in Jenkins.
 
 Configure Source Code Management to use a Git repository.
