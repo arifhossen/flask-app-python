@@ -107,6 +107,26 @@ Copy the password and paste it into the "Administrator password" field.
 
 
 # Create Jenkine Pipeline CI/CD 
+
+## Install docker on Ubuntu machine
+```Bash
+apt install docker.io -y
+```
+
+## Docker add to user group
+```Bash
+sudo usermod -aG docker ubuntu
+sudo usermod -aG docker jenkins
+groups jenkins
+sudo chown root:docker /var/run/docker.sock
+sudo chmod 660 /var/run/docker.sock
+sudo systemctl restart jenkins
+sudo systemctl start docker
+sudo systemctl enable docker
+```
+
+
+
 ## Create New Item and source code setup and scirpt command
 Create a new freestyle project in Jenkins.
 
@@ -139,24 +159,6 @@ echo "Image run by Docker on port 7999"
 
  Save and build the project.
 
-
-
-## Install docker on Ubuntu
-```Bash
-apt install docker.io -y
-```
-
-## Docker add to user group
-```Bash
-sudo usermod -aG docker ubtunu
-sudo usermod -aG docker jenkins
-groups jenkins
-sudo chown root:docker /var/run/docker.sock
-sudo chmod 660 /var/run/docker.sock
-sudo systemctl restart jenkins
-sudo systemctl start docker
-sudo systemctl enable docker
-```
 
 ## nginx install
 ```bash
