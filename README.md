@@ -106,6 +106,7 @@ Copy the password and paste it into the "Administrator password" field.
     Configure Jenkins instance.
 
 
+# Create Jenkine Pipeline CI/CD 
 ## Create New Item and source code setup and scirpt command
 Create a new freestyle project in Jenkins.
 
