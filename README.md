@@ -1,120 +1,99 @@
-# Step 1: Launch an Ubuntu EC2 Instance
-Login to AWS Management Console:
+# Setup Jenkins and Docker on Ubuntu EC2 Instance
 
-Go to the EC2 Dashboard and launch a new instance.
-Choose an Ubuntu AMI (Amazon Machine Image), such as "Ubuntu Server 20.04 LTS".
-Instance Configuration:
+This guide provides step-by-step instructions for launching an Ubuntu EC2 instance, installing Jenkins and Docker, and setting up a Jenkins CI/CD pipeline to deploy a Python application.
 
-Select instance type (e.g., t2.small for testing purposes).
-Configure instance details (e.g., VPC, subnet).
-Add storage (default 8 GB is typically sufficient for Jenkins).
-Security Group Configuration:
+## Step 1: Launch an Ubuntu EC2 Instance
 
-Add rules to allow SSH (port 22) from your IP address.
-Add rules to allow HTTP (port 8080 for Jenkins default port) and HTTPS (port 443).
-Add rules to allow Python Application run custom port on 7999
+### Login to AWS Management Console:
+1. Navigate to the EC2 Dashboard and launch a new instance.
+2. Choose an Ubuntu AMI (e.g., "Ubuntu Server 20.04 LTS").
 
-Launch Instance:
+### Instance Configuration:
+1. Select an instance type (e.g., t2.small for testing purposes).
+2. Configure instance details (e.g., VPC, subnet).
+3. Add storage (default 8 GB is typically sufficient for Jenkins).
 
-Review and launch the instance.
-Download or select an existing key pair to SSH into your instance.
+### Security Group Configuration:
+1. Add rules to allow SSH (port 22) from your IP address.
+2. Add rules to allow HTTP (port 8080 for Jenkins default port) and HTTPS (port 443).
+3. Add rules to allow the Python application to run on custom port 7999.
 
+### Launch Instance:
+1. Review and launch the instance.
+2. Download or select an existing key pair to SSH into your instance.
 
-# Step 2: Connect to Your Instance
-SSH into Your Instance:
+## Step 2: Connect to Your Instance
+
+### SSH into Your Instance:
 Open your terminal and connect to your instance using the key pair.
 ```bash
 ssh -i /path/to/your-key.pem ubuntu@your-ec2-public-dns
 ```
 
-# Step 3: Update Ubuntu System Packages
+## Step 3: Update Ubuntu System Packages
 
-Update System Packages: Update the package list and install the latest updates.
-
+### Update System Packages:
+Update the package list and install the latest updates.
 ```bash
 sudo apt update
 sudo apt upgrade -y
 ```
 
-## Install Java and Jenkins on Ubuntu
-Below the reference site for installation
-https://www.jenkins.io/doc/book/installing/linux/#debianubuntu
+## Step 4: Install Java and Jenkins
 
-### Installation of Java
-Jenkins requires Java to run, yet not all Linux distributions include Java by default. Additionally, not all Java versions are compatible with Jenkins.
-
+### Install Java:
+Jenkins requires Java to run. Install Java using the following commands:
 ```bash
 sudo apt update
 sudo apt install fontconfig openjdk-17-jre
 java -version
 ```
 
-
 ### Install Jenkins:
-On Debian and Debian-based distributions like Ubuntu you can install Jenkins through apt.
+Add the Jenkins repository and install Jenkins.
 ```bash
-sudo wget -O /usr/share/keyrings/jenkins-keyring.asc \
-  https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
-echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc]" \
-  https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
-  /etc/apt/sources.list.d/jenkins.list > /dev/null
+sudo wget -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
 sudo apt-get update
 sudo apt-get install jenkins
 ```
 
-### Start Jenkins
-You can enable the Jenkins service to start at boot with the command:
+### Start Jenkins:
+Enable and start the Jenkins service.
 ```bash
 sudo systemctl enable jenkins
-```
-You can start the Jenkins service with the command:
-
-```bash
 sudo systemctl start jenkins
-```
-You can check the status of the Jenkins service using the command:
-
-```bash
 sudo systemctl status jenkins
 ```
 
-If everything has been set up correctly, you should see an output like this:
+## Step 5: Configure Jenkins
 
-Loaded: loaded (/lib/systemd/system/jenkins.service; enabled; vendor preset: enabled)
-Active: active (running) since Tue 2018-11-13 16:19:01 +03; 4min 57s ago
+### Access Jenkins:
+Open a web browser and navigate to `http://your-ec2-public-dns:8080`.
 
-
-
-###  Step 4: Configure Jenkins
-Access Jenkins:
-
-Open a web browser and navigate to http://your-ec2-public-dns:8080.
-
-Unlock Jenkins:
+### Unlock Jenkins:
 Retrieve the initial admin password.
-
+```bash
 sudo cat /var/lib/jenkins/secrets/initialAdminPassword
-
+```
 Copy the password and paste it into the "Administrator password" field.
 
 ### Customize Jenkins:
+1. Install suggested plugins.
+2. Create your first admin user.
+3. Configure the Jenkins instance.
 
-    Install suggested plugins.
+## Step 6: Install Docker on Ubuntu
 
-    Create your first admin user.
-
-    Configure Jenkins instance.
-
-
-# Create Jenkine Pipeline CI/CD 
-
-## Install docker on Ubuntu machine
-```Bash
-apt install docker.io -y
+### Install Docker:
+Install Docker using the following command:
+```bash
+sudo apt install docker.io -y
 ```
 
-## Docker add to user group
-```Bash
+### Add Docker to User Group:
+Add the `ubuntu` and `jenkins` users to the Docker group and set permissions.
+```bash
 sudo usermod -aG docker ubuntu
 sudo usermod -aG docker jenkins
 groups jenkins
@@ -125,27 +104,25 @@ sudo systemctl start docker
 sudo systemctl enable docker
 ```
 
+## Step 7: Create Jenkins Pipeline CI/CD
 
+### Create a New Item in Jenkins:
+1. Create a new freestyle project in Jenkins.
+2. Configure Source Code Management to use a Git repository.
+3. Add a build step to run a shell script.
 
-## In jenkins : Create New Item and source code setup and scirpt command
-Create a new freestyle project in Jenkins.
-
-Configure Source Code Management to use a Git repository.
-
-Add a build step to run a shell script.
-
-
-```Bash    
+### Shell Script for CI/CD Pipeline:
+```bash    
 # Check if any container is using port 7999 and stop it
 if [ "$(docker ps -q -f publish=7999)" ]; then
-echo "Stopping existing container using port 7999..."
-docker stop $(docker ps -q -f publish=7999)
+    echo "Stopping existing container using port 7999..."
+    docker stop $(docker ps -q -f publish=7999)
 fi
 
 # Check if the image already exists and remove it
 if docker image inspect flask-app:latest > /dev/null 2>&1; then
-echo "Removing existing image..."
-docker image rm -f flask-app:latest
+    echo "Removing existing image..."
+    docker image rm -f flask-app:latest
 fi
 
 # Build the new image
@@ -157,49 +134,39 @@ docker run -d -p 7999:7999 flask-app:latest
 echo "Image run by Docker on port 7999"
 ```
 
- Save and build the project.
-
- Check your project run your url like:
- http://98.80.7.22:7999/
-
-
-## nginx install
+### Save and Build the Project:
+Save your configuration and build the project. Access your application at:
 ```bash
-nginx -v
+http://your-ec2-public-dns:7999/
+```
+
+## Step 8: Install Nginx
+
+### Install Nginx:
+```bash
 sudo apt update
+sudo apt install nginx
+```
+
+### Install Certbot for SSL:
+```bash
 sudo apt install certbot python3-certbot-nginx
 ```
 
-## SSL Certificate add by nginx for Subdomain
+## Step 9: Configure Nginx for SSL and Proxy
+
+### Obtain an SSL Certificate:
 ```bash
 sudo certbot --nginx -d pythonapp.arifhossen.net
 ```
 
-## nginx (for configuration files)
-```bash
-cd /etc/nginx/
-```
-
-## nginx sites-available
-```bash
-cd /etc/nginx/sites-available/
-```
-
-## sites-enabled: This directory contains symlinks to the configuration files in sites-available that are enabled.
-```bash
-/etc/nginx/sites-enabled/
-```
-
-
-##  Managing Virtual Hosts
-
-## Managing Virtual Hosts
-Create a Virtual Host Configuration:  Create a new configuration file in the sites-available directory.
+### Nginx Configuration:
+Create a new configuration file for your site.
 ```bash
 sudo nano /etc/nginx/sites-available/arifhossen.net
 ```
 
-Example content for example.com: 
+### Example Nginx Configuration:
 ```bash
 server {
     listen 80;
@@ -215,38 +182,30 @@ server {
 }
 ```
 
-## Enable the Site:
-Create a symlink from the sites-available configuration file to the sites-enabled directory.
+### Enable the Site:
+Create a symlink to the configuration file in the sites-enabled directory.
 ```bash
 sudo ln -s /etc/nginx/sites-available/arifhossen.net /etc/nginx/sites-enabled/
 ```
 
-## Test Nginx Configuration:
+### Test and Reload Nginx:
 Test the Nginx configuration for syntax errors.
 ```bash
 sudo nginx -t
 ```
-
-If the test is successful, you should see: 
-nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
-nginx: configuration file /etc/nginx/nginx.conf test is successful
-
-## Reload Nginx:
-
 Reload Nginx to apply the changes.
 ```bash
 sudo systemctl reload nginx
 ```
 
-##  Additional Information
-### Disabling a Site:
-
+### Disable a Site:
 To disable a site, remove the symlink from the sites-enabled directory.
 ```bash
 sudo rm /etc/nginx/sites-enabled/arifhossen.net
 ```
-
-Then reload Nginx to apply the changes:
+Reload Nginx to apply the changes.
 ```bash
 sudo systemctl reload nginx
 ```
+
+By following these steps, you will have set up Jenkins and Docker on an Ubuntu EC2 instance, created a CI/CD pipeline to deploy a Python application, and configured Nginx for SSL and proxy settings.
