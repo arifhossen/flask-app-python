@@ -12,7 +12,7 @@ Security Group Configuration:
 
 Add rules to allow SSH (port 22) from your IP address.
 Add rules to allow HTTP (port 8080 for Jenkins default port) and HTTPS (port 443).
-Add rules to allow Python Application run custom port on 7000
+Add rules to allow Python Application run custom port on 7999
 
 Launch Instance:
 
@@ -115,10 +115,10 @@ Add a build step to run a shell script.
 
 
 ```Bash    
-# Check if any container is using port 7000 and stop it
-if [ "$(docker ps -q -f publish=7000)" ]; then
-echo "Stopping existing container using port 7000..."
-docker stop $(docker ps -q -f publish=7000)
+# Check if any container is using port 7999 and stop it
+if [ "$(docker ps -q -f publish=7999)" ]; then
+echo "Stopping existing container using port 7999..."
+docker stop $(docker ps -q -f publish=7999)
 fi
 
 # Check if the image already exists and remove it
@@ -132,8 +132,8 @@ docker build . -t flask-app:latest
 echo "Image created"
 
 # Run the new image
-docker run -d -p 7000:7000 flask-app:latest
-echo "Image run by Docker on port 7000"
+docker run -d -p 7999:7999 flask-app:latest
+echo "Image run by Docker on port 7999"
 ```
 
  Save and build the project.
@@ -200,7 +200,7 @@ server {
     server_name pythonapp.arifhossen.net;
 
     location / {
-        proxy_pass http://127.0.0.1:7000;
+        proxy_pass http://127.0.0.1:7999;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
