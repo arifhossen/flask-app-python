@@ -159,6 +159,9 @@ echo "Image run by Docker on port 7999"
 
  Save and build the project.
 
+ Check your project run your url like:
+ http://98.80.7.22:7999/
+
 
 ## nginx install
 ```bash
